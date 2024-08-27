@@ -10,13 +10,11 @@ export const MarkdownWrite = () => {
 
     return (
         <>
-            <Grid2 container spacing={10} height={"90vh"} padding={"30px"}>
-                <Grid2 size={6}>
-                    <Redaction redacValue={(value) => setTextValue(value)} />
-                </Grid2>
-                <Grid2 size={6}>
-                    <RenderMD value={textValue} />
-                </Grid2>
+            <Grid2 size={4}>
+                <Redaction redacValue={(value) => setTextValue(value)} />
+            </Grid2>
+            <Grid2 size={4}>
+                <RenderMD value={textValue} />
             </Grid2>
         </>
     )

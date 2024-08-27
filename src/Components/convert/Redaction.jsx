@@ -11,7 +11,7 @@ export const Redaction = ({ redacValue }) => {
 
     return (
         <>
-            <textarea value={textValue} onChange={(e) => setTextValue(e.target.value)} style={{ width: '100%', height: "100%", resize: "none", fontFamily: "'Poppins', 'sans-serif'" }}>
+            <textarea value={textValue} onChange={(e) => setTextValue(e.target.value)} style={{ width: '100%', height: "100%", resize: "none", fontFamily: "'Poppins', 'sans-serif'", padding: "10px" }}>
             </textarea>
         </>
     )

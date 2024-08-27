@@ -17,9 +17,7 @@ export const RenderMD = ({ value }) => {
     }, [value])
 
     return (
-        <div>
-            <div ref={ref}></div>
-        </div>
+        <div style={{ padding: "10px" }} ref={ref}></div>
     )
 }
 
