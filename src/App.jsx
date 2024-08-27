@@ -1,9 +1,11 @@
 
+import Template from "./Components/buttons/Template"
+
 function App() {
 
   return (
     <>
-      <h1>App</h1>
+      <Template></Template>
     </>
   )
 }
