@@ -1,8 +1,9 @@
 import React from 'react'
+import Button from '@mui/material/Button';
 
 function Template({name, fonction}) {
   return (
-    <button type="button" onClick={fonction}>{name}</button>
+    <Button variant="contained" onClick={fonction}>{name}</Button>
   )
 }
 
