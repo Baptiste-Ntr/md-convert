@@ -1,6 +1,6 @@
 import { useDrag } from "react-dnd";
 
-function CarreGallerie({ srcImg, nomDeLaClasse, nom, selectionner, isDragging, text }) {
+function CarreGallerie({ srcImg, nomDeLaClasse, nom, selectionner, isDragging, text, idElement }) {
   if (selectionner) {
     console.log("coucou");
   }
@@ -16,9 +16,9 @@ function CarreGallerie({ srcImg, nomDeLaClasse, nom, selectionner, isDragging, t
   )
 
   return (
-    <div className={nomDeLaClasse} ref={dragRef} style={{ opacity }}>
-      <img src={srcImg} style={{ maxWidth: '100px' }} id={nomDeLaClasse + '_' + crypto.randomUUID()} />
-      <p name="nomElement"> {nom} </p>
+    <div className={nomDeLaClasse} ref={dragRef} style={{ opacity, zIndex: 800, }}>
+      <img src={srcImg} style={{ maxWidth: '100px' }} id={idElement} className={nomDeLaClasse} />
+      <p name="nomElement" className={nomDeLaClasse}> {nom} </p>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Grid2, Stack } from '@mui/material';
 import CarreGallerie from '../carregallerie/CarreGallerie';
 
 import PropTypes from 'prop-types';
@@ -12,17 +12,20 @@ function MesMarkdowns({ contenusRepo }) {
 
 
   return (
-    <Stack direction={"row"} spacing={10}>
+    <Grid2 container spacing={2} width={"60vw"}>
       {/* Liste des dossiers & fichiers */}
       {contenusRepo.map(({ id, nomDeLaClasse, nom, nomDossier }) => (
-        <CarreGallerie
-          key={id}
-          srcImg={nomDeLaClasse == "fichier" ? "/assets/fichier-texte.png" : "/assets/dossier.png"}
-          nom={nom ? nom : nomDossier}
-          nomDeLaClasse={nomDeLaClasse}
-        />
+        <Grid2 size={4}>
+          <CarreGallerie
+            key={crypto.randomUUID()}
+            srcImg={nomDeLaClasse == "fichier" ? "/assets/fichier-texte.png" : "/assets/dossier.png"}
+            nom={nom ? nom : nomDossier}
+            nomDeLaClasse={nomDeLaClasse}
+            idElement={id}
+          />
+        </Grid2>
       ))}
-    </Stack>
+    </Grid2>
 
   );
 }

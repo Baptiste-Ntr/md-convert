@@ -44,21 +44,21 @@ request.onupgradeneeded = (event) => {
 //   {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
 // ]
 
-request.onsuccess = () => {
-  console.log("Database opened successfully");
+// request.onsuccess = () => {
+//   console.log("Database opened successfully");
 
-  const db = request.result;
+//   const db = request.result;
 
-  var tx = db.transaction(["dossiers", "fichiers"], "readwrite");
-  const dossiersStore = tx.objectStore("dossiers");
-  const fichiersStore = tx.objectStore("fichiers");
+//   var tx = db.transaction(["dossiers", "fichiers"], "readwrite");
+//   const dossiersStore = tx.objectStore("dossiers");
+//   const fichiersStore = tx.objectStore("fichiers");
 
 
-  dossiers.forEach((item) => dossiersStore.add(item));
-  lesFichiers.forEach((item) => fichiersStore.add(item));
+//   dossiers.forEach((item) => dossiersStore.add(item));
+//   lesFichiers.forEach((item) => fichiersStore.add(item));
 
-  return tx.complete;
-};
+//   return tx.complete;
+// };
 
 
 idb.onerror = function (event) {

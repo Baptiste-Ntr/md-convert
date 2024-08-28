@@ -21,7 +21,7 @@ const ClicDroitMenu = ({ xPos, yPos, showMenu, listActions, doClicAction }) => {
     <div style={monstyle}>
       <ul style={{ listStyleType: 'none', margin: 0, padding: 10 }}>
         {listActions.map(({idAction, action}) => (
-          <li id={idAction} onClick={clicAction}>{action}</li>
+          <li key={crypto.randomUUID()} id={idAction} onClick={clicAction}>{action}</li>
         ))}
       </ul>
     </div>
