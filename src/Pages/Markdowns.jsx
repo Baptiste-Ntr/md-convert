@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import MesMarkdowns from "../Components/mesmarkdonws/MesMarkdowns"
 import ClicDroitMenu from "../Components/clicdroitmenu/ClicDroitMenu";
+import { HeaderMarkdowns } from "../Components/Header/HeaderMarkdowns";
+import { Link } from "react-router-dom";
+import { SideBar } from "../Components/SideBar/SideBar";
+import { MDProvider } from "../Components/Context/MDContext";
+import { Grid2 } from "@mui/material";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 export const Markdowns = () => {
     const [contenusRepo, setContenusRepo] = useState([]);
@@ -131,6 +138,12 @@ export const Markdowns = () => {
         }))
     };
 
+    const linksList = [
+        <Link to="/blocs" key={2}>Blocs</Link>,
+        <Link to="/images" key={3}>Images</Link>,
+        <Link to="/markdown" key={4}>Markdown</Link>,
+    ]
+
     const listActions = [
         {idAction: "add-file", action: "Nouveau Fichier"},
         {idAction: "add-folder", action: "Nouveau Dossier"},
@@ -139,17 +152,21 @@ export const Markdowns = () => {
       ]
 
     return (
-        <>
-            <div onContextMenu={handleContextMenu} onClick={handleClick} style={{ height: '100vh' }}>
-                <ClicDroitMenu
-                    xPos={menuData.xPos}
-                    yPos={menuData.yPos}
-                    showMenu={menuData.showMenu}
-                    listActions={listActions}
+        <DndProvider backend={HTML5Backend}>
+            <MDProvider>
+                <HeaderMarkdowns />
+                <Grid2 container height={"80vh"} padding={"10px"} spacing={3}>
+                    <ClicDroitMenu
+                        xPos={menuData.xPos}
+                        yPos={menuData.yPos}
+                        showMenu={menuData.showMenu}
+                        listActions={listActions}
                     doClicAction={doClicAction}
-                />
-            </div>
-            <MesMarkdowns contenusRepo={contenusRepo} ></MesMarkdowns>
-        </>
+                    />
+                    <SideBar linksList={linksList} />
+                    <MesMarkdowns contenusRepo={contenusRepo} ></MesMarkdowns>
+                </Grid2>
+            </MDProvider>
+        </DndProvider>
     )
 }
