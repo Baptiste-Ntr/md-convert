@@ -130,6 +130,14 @@ export const Markdowns = () => {
             showMenu: false,
         }))
     };
+
+    const listActions = [
+        {idAction: "add-file", action: "Nouveau Fichier"},
+        {idAction: "add-folder", action: "Nouveau Dossier"},
+        {idAction: "rename", action: "Renommer"},
+        {idAction: "delete", action: "Supprimer"}
+      ]
+
     return (
         <>
             <div onContextMenu={handleContextMenu} onClick={handleClick} style={{ height: '100vh' }}>
@@ -137,6 +145,7 @@ export const Markdowns = () => {
                     xPos={menuData.xPos}
                     yPos={menuData.yPos}
                     showMenu={menuData.showMenu}
+                    listActions={listActions}
                     doClicAction={doClicAction}
                 />
             </div>

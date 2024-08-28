@@ -23,10 +23,6 @@ const ClicDroitMenu = ({ xPos, yPos, showMenu, listActions, doClicAction }) => {
         {listActions.map(({idAction, action}) => (
           <li id={idAction} onClick={clicAction}>{action}</li>
         ))}
-        {/* <li id="add-file" onClick={clicAction}>Nouveau Fichier</li>
-        <li id="add-folder" onClick={clicAction}>Nouveau Dossier</li>
-        <li id="rename" onClick={clicAction}>Renommer</li>
-        <li id="delete" onClick={clicAction}>Supprimer</li> */}
       </ul>
     </div>
   );
