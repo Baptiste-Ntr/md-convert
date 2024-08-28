@@ -2,8 +2,8 @@ import { Grid2 } from "@mui/material"
 import { MarkdownWrite } from "../Components/convert/MarkdownWrite"
 import { SideBar } from "../Components/SideBar/SideBar"
 import { Link } from "react-router-dom"
-import Button from "../Components/Buttons/Button"
-import { Header } from "../Components/Header/Header"
+import { HeaderHome } from "../Components/Header/HeaderHome"
+import { MDProvider } from "../Components/Context/MDContext"
 
 export const Home = () => {
 
@@ -13,17 +13,13 @@ export const Home = () => {
         <Link to="/markdown" key={4}>Markdown</Link>,
     ]
 
-    const buttonList = [
-        <Button name="Export MD" fonction={() => console.log("MD")} key={1} />,
-    ]
-
     return (
-        <>
-            <Header buttonList={buttonList} />
+        <MDProvider>
+            <HeaderHome />
             <Grid2 container height={"80vh"} padding={"10px"} spacing={3}>
                 <SideBar linksList={linksList} />
                 <MarkdownWrite />
             </Grid2>
-        </>
+        </MDProvider>
     )
 }
