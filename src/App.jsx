@@ -158,16 +158,16 @@ function App() {
     <>
       <MDProvider>
         <RouterProvider router={router} />
+        <div onContextMenu={handleContextMenu} onClick={handleClick} style={{ height: '100vh' }}>
+          <ClicDroitMenu
+            xPos={menuData.xPos}
+            yPos={menuData.yPos}
+            showMenu={menuData.showMenu}
+            doClicAction={doClicAction}
+          />
+          <MesMarkdowns contenusRepo={contenusRepo} ></MesMarkdowns>
+        </div>
       </MDProvider>
-      <div onContextMenu={handleContextMenu} onClick={handleClick} style={{ height: '100vh' }}>
-        <ClicDroitMenu
-          xPos={menuData.xPos}
-          yPos={menuData.yPos}
-          showMenu={menuData.showMenu}
-          doClicAction={doClicAction}
-        />
-        <MesMarkdowns contenusRepo={contenusRepo} ></MesMarkdowns>
-      </div>
     </>
   )
 }
