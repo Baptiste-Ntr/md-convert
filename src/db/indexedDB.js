@@ -34,15 +34,15 @@ request.onupgradeneeded = (event) => {
 
 };
 
-const lesFichiers = [
-  {id: 1, nom: "Fichier 1", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
-  {id: 2, nom: "Fichier 2", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
-  {id: 3, nom: "Fichier 3", nomDeLaClasse: "fichier", idDossier: 1, contenus: ""},
-]
+// const lesFichiers = [
+//   {id: 1, nom: "Fichier 1", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
+//   {id: 2, nom: "Fichier 2", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
+//   {id: 3, nom: "Fichier 3", nomDeLaClasse: "fichier", idDossier: 1, contenus: ""},
+// ]
 
-const dossiers = [
-  {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
-]
+// const dossiers = [
+//   {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
+// ]
 
 request.onsuccess = () => {
   console.log("Database opened successfully");
