@@ -9,25 +9,30 @@ export const MarkdownWrite = () => {
 
     const [textValue, setTextValue] = useState()
 
-    const { setMDFile } = useContext(MDContext)
+    const { setMDFile, importedFile } = useContext(MDContext)
 
     useEffect(() => {
         setMDFile(textValue)
     }, [textValue, setMDFile])
 
+    useEffect(() => {
+        if (importedFile) {
+            setTextValue(importedFile);
+        }
+    }, [importedFile]);
+
     return (
         <>
             <Grid2 size={4}>
-                <Redaction redacValue={(value) => setTextValue(value)} />
+                <Redaction redacValue={(value) => setTextValue(value)} initialValue={textValue} />
             </Grid2>
             <Grid2 size={4}>
-                <RenderMD value={textValue} />
+                <RenderMD value={textValue ?? ""} />
             </Grid2>
             <Grid2 size={2}>
                 <Button onClick={() => setTextValue("")}>Clear</Button>
                 <Button onClick={() => navigator.clipboard.writeText(textValue)}>Copy</Button>
-                {/* <Button onClick={() => handleSave(textValue)}>Save</Button> */}
             </Grid2>
         </>
-    )
+    );
 }

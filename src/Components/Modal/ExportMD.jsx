@@ -8,8 +8,6 @@ export const ExportMD = ({ title }) => {
 
     const { mdFile } = useContext(MDContext)
 
-    console.log(mdFile)
-
     const [modal, setModal] = useState({
         open: false,
         title: ""

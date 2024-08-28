@@ -1,4 +1,4 @@
-import { createContext, useState } from "react"
+import { createContext, useEffect, useState } from "react"
 
 import propTypes from "prop-types"
 
@@ -8,8 +8,15 @@ export const MDProvider = ({ children }) => {
 
     const [mdFile, setMDFile] = useState()
 
+    const [importedFile, setImportedFile] = useState()
+
+    useEffect(() => {
+        console.log("mdFile", mdFile)
+        console.log("importedFile", importedFile)
+    }, [mdFile, setMDFile, importedFile, setImportedFile])
+
     return (
-        <MDContext.Provider value={{ mdFile, setMDFile }}>
+        <MDContext.Provider value={{ mdFile, setMDFile, importedFile, setImportedFile }}>
             {children}
         </MDContext.Provider>
     )
