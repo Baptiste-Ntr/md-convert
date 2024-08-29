@@ -1,13 +1,13 @@
 import React from 'react'
 
-function CarreGallerie({srcImg, nomDeLaClasse, nom, selectionner}) {
+function CarreGallerie({srcImg, nomDeLaClasse, nom, selectionner, maxWidth, styleCustom}) {
   if (selectionner) {
     console.log("coucou");
   }  
 
   return (
-    <div className={nomDeLaClasse}>
-        <img src={srcImg} style={{maxWidth: '100px'} } id={nomDeLaClasse + '_' + crypto.randomUUID()}/>
+    <div style={{styleCustom}}>
+        <img src={srcImg} style={{ maxWidth: maxWidth ? maxWidth : '100px' }}  id={nomDeLaClasse + '_' + crypto.randomUUID()}/>
         <p name="nomElement"> {nom} </p>
     </div>
   )
