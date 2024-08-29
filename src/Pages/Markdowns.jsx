@@ -18,21 +18,21 @@ export const Markdowns = () => {
         clickedElement: ""
     })
 
-    const sortContenusRepo = (contenus) => {
-        return contenus.sort((a, b) => {
-            // Trier d'abord par type : "dossier" avant "fichier"
-            if (a.nomDeLaClasse === "dossier" && b.nomDeLaClasse !== "dossier") {
-                return -1;
-            }
-            if (a.nomDeLaClasse !== "dossier" && b.nomDeLaClasse === "dossier") {
-                return 1;
-            }
-            // Si les deux sont du même type, trier par nom (nomDossier ou nom)
-            const nameA = a.nom || a.nomDossier;
-            const nameB = b.nom || b.nomDossier;
-            return nameA.localeCompare(nameB);
-        });
-    };
+    // const sortContenusRepo = (contenus) => {
+    //     return contenus.sort((a, b) => {
+    //         // Trier d'abord par type : "dossier" avant "fichier"
+    //         if (a.nomDeLaClasse === "dossier" && b.nomDeLaClasse !== "dossier") {
+    //             return -1;
+    //         }
+    //         if (a.nomDeLaClasse !== "dossier" && b.nomDeLaClasse === "dossier") {
+    //             return 1;
+    //         }
+    //         // Si les deux sont du même type, trier par nom (nomDossier ou nom)
+    //         const nameA = a.nom || a.nomDossier;
+    //         const nameB = b.nom || b.nomDossier;
+    //         return nameA.localeCompare(nameB);
+    //     });
+    // };
 
 
     useEffect(() => {
@@ -66,7 +66,8 @@ export const Markdowns = () => {
                     const fichiersResult = query.target.result;
 
                     // Combine le resultats de la recherche sur dossiers et fichiers dans contenusRepo
-                    setContenusRepo(sortContenusRepo([...dossiersResult, ...fichiersResult.fichiers]))
+                    // setContenusRepo(sortContenusRepo([...dossiersResult, ...fichiersResult.fichiers]))
+                    setContenusRepo([...dossiersResult, ...fichiersResult.fichiers])
                 };
 
                 fichiersRequest.onerror = (event) => {
@@ -132,7 +133,7 @@ export const Markdowns = () => {
             request.onsuccess = () => {
                 // Recupère la bdd
                 const db = request.result;
-                const tx = db.transaction(["dossiers", "fichiers"], "readwrite");
+                const tx = db.transaction(["dossiers"], "readwrite");
                 const dossierData = tx.objectStore("dossiers");
                 const dossierRacine = dossierData.index('id').get(0);
 
@@ -144,7 +145,8 @@ export const Markdowns = () => {
 
                     updateDossierRequest.onsuccess = () => {
                         // Mettre à jour l'état pour inclure le nouveau fichier
-                        setContenusRepo((prevContenusRepo) => sortContenusRepo([...prevContenusRepo, newFile]));
+                        // setContenusRepo((prevContenusRepo) => sortContenusRepo([...prevContenusRepo, newFile]));
+                        setContenusRepo((prevContenusRepo) => [...prevContenusRepo, newFile]);
                     }
 
                     updateDossierRequest.onerror = (event) => {
@@ -185,7 +187,8 @@ export const Markdowns = () => {
 
                 addRequest.onsuccess = () => {
                     // Mettre à jour l'état pour inclure le nouveau fichier
-                    setContenusRepo((prevContenusRepo) => sortContenusRepo([newFolder, ...prevContenusRepo]));
+                    // setContenusRepo((prevContenusRepo) => sortContenusRepo([newFolder, ...prevContenusRepo]));
+                    setContenusRepo((prevContenusRepo) => [newFolder, ...prevContenusRepo]);
                 };
 
                 addRequest.onerror = (event) => {
@@ -239,9 +242,13 @@ export const Markdowns = () => {
 
                         updateRequest.onsuccess = () => {
                             // Mettre à jour l'état pour refléter le nouveau nom
-                            setContenusRepo((prevContenusRepo) => sortContenusRepo(
+                            // setContenusRepo((prevContenusRepo) => sortContenusRepo(
+                            //     prevContenusRepo.map(el => (el.id === id ? objectToRename : el))
+                            // ));
+                            
+                            setContenusRepo((prevContenusRepo) => 
                                 prevContenusRepo.map(el => (el.id === id ? objectToRename : el))
-                            ));
+                            );
                         };
 
                         updateRequest.onerror = (event) => {
