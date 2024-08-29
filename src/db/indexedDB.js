@@ -35,13 +35,13 @@ request.onupgradeneeded = (event) => {
   if (!db.objectStoreNames.contains("fichiers")) {
     const fichiersStore = db.createObjectStore("fichiers", { keyPath: "id", autoIncrement: true });
     fichiersStore.createIndex("idDossier", "idDossier", { unique: false });
-    fichiersStore.add({id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"});
   }
 
     // Création du magasin d'objets pour les images
     if (!db.objectStoreNames.contains("images")) {
       const imagesStore = db.createObjectStore("images", { keyPath: "id", autoIncrement: true });
       imagesStore.createIndex("emplacement", "emplacement", { unique: false });
+      imagesStore.add({id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"});
     }
   
 
