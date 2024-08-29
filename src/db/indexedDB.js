@@ -23,7 +23,12 @@ request.onupgradeneeded = (event) => {
   if (!db.objectStoreNames.contains("dossiers")) {
     const dossiersStore = db.createObjectStore("dossiers", { keyPath: "id", autoIncrement: true });
     dossiersStore.createIndex("emplacement", "emplacement", { unique: false });
+    dossiersStore.createIndex("fichiers", "fichiers", { unique: false });
+    dossiersStore.createIndex("id", "id", { unique: true });
 
+    const dossierRacine = {id: 0, nomDossier: "home", fichiers: [], emplacement: 0, nomDeLaClasse: "dossier"}
+
+    dossiersStore.add(dossierRacine);
   }
 
   // Création du magasin d'objets pour les fichiers
@@ -40,22 +45,29 @@ request.onupgradeneeded = (event) => {
 //   {id: 3, nom: "Fichier 3", nomDeLaClasse: "fichier", idDossier: 1, contenus: ""},
 // ]
 
-// const dossiers = [
-//   {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
-// ]
+const dossierRacine = [
+  {id: 0, nomDossier: "home", fichiers: [], emplacement: 0}
+]
 
 // request.onsuccess = () => {
 //   console.log("Database opened successfully");
-
 //   const db = request.result;
 
-//   var tx = db.transaction(["dossiers", "fichiers"], "readwrite");
-//   const dossiersStore = tx.objectStore("dossiers");
-//   const fichiersStore = tx.objectStore("fichiers");
+//   if (db.objectStoreNames.contains("dossiers")) {
+//     var tx = db.transaction(["dossiers"], "readwrite");
+//     const dossiersStore = tx.objectStore("dossiers")
+//     const dossierFind = dossiersStore.index('id').get(0)
 
-
-//   dossiers.forEach((item) => dossiersStore.add(item));
-//   lesFichiers.forEach((item) => fichiersStore.add(item));
+//     dossierFind.onsuccess = (event) => {
+//       const result = event.target.result;
+//       console.log(result);
+      
+//       if (!result) {
+//         dossiersStore.add(dossierRacine)
+//       } 
+//     };
+  
+//   }
 
 //   return tx.complete;
 // };
@@ -63,6 +75,7 @@ request.onupgradeneeded = (event) => {
 
 idb.onerror = function (event) {
     // Gestionnaire d'erreur générique pour toutes les erreurs de requêtes de cette base
-    alert("Database error: " + event.target.errorCode);
+    console.log("Database error: " + event.target.errorCode);;
+    
 };
 

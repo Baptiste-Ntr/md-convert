@@ -11,7 +11,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 export const Markdowns = () => {
     const [contenusRepo, setContenusRepo] = useState([]);
-
     const [menuData, setMenuData] = useState({
         showMenu: false,
         xPos: 0,
@@ -30,7 +29,6 @@ export const Markdowns = () => {
             }
             // Si les deux sont du même type, trier par nom (nomDossier ou nom)
             const nameA = a.nom || a.nomDossier;
-
             const nameB = b.nom || b.nomDossier;
             return nameA.localeCompare(nameB);
         });
@@ -50,13 +48,12 @@ export const Markdowns = () => {
             const tx = db.transaction(["dossiers", "fichiers"], "readonly");
             // On vas effectuer un rechercher sur l'index emplacement et idDossier (voir src/db/indexedDB)
             const dossierData = tx.objectStore("dossiers").index("emplacement");
-            const fichiersData = tx.objectStore("fichiers").index("idDossier");
 
             // On lance la recherche sur ces index
             // Revient à faire un SELECT * FROM dossiers WHERE emplacement = 0 
-            const dossiersRequest = dossierData.getAll(0);
-            // Revient à faire un SELECT * FROM fichiers WHERE idDossier = 0 
-            const fichiersRequest = fichiersData.getAll(0);
+            const dossiersRequest = dossierData.getAll(1);
+            // Revient à faire un SELECT fichiers FROM dossiers WHERE id = 0 
+            const fichiersRequest = dossierData.get(0);
 
             // Si la requette à réussi
             dossiersRequest.onsuccess = (query) => {
@@ -67,9 +64,9 @@ export const Markdowns = () => {
                 fichiersRequest.onsuccess = (query) => {
                     // Récupère le résultat de la requette
                     const fichiersResult = query.target.result;
-                    // Combine le resultats de la recherche sur dossiers et fichiers dans contenusRepo
 
-                    setContenusRepo(sortContenusRepo([...dossiersResult, ...fichiersResult]))
+                    // Combine le resultats de la recherche sur dossiers et fichiers dans contenusRepo
+                    setContenusRepo(sortContenusRepo([...dossiersResult, ...fichiersResult.fichiers]))
                 };
 
                 fichiersRequest.onerror = (event) => {
@@ -126,7 +123,8 @@ export const Markdowns = () => {
                 id: crypto.randomUUID(),
                 nom: fileName,
                 nomDeLaClasse: "fichier",
-                idDossier: 0 // Vous pouvez ajuster cela en fonction du dossier sélectionné
+                idDossier: 0,
+                contenu: ""
             };
             const request = indexedDB.open("markdown_repository");
 
@@ -134,20 +132,26 @@ export const Markdowns = () => {
             request.onsuccess = () => {
                 // Recupère la bdd
                 const db = request.result;
-                const tx = db.transaction("fichiers", "readwrite");
-                const fichierData = tx.objectStore("fichiers");
+                const tx = db.transaction(["dossiers", "fichiers"], "readwrite");
+                const dossierData = tx.objectStore("dossiers");
+                const dossierRacine = dossierData.index('id').get(0);
 
-                // Ajouter le nouveau fichier dans la base de données
-                const addRequest = fichierData.add(newFile);
+                dossierRacine.onsuccess = () => {
+                    const dossier = dossierRacine.result
+                    dossier.fichiers.push(newFile)
 
-                addRequest.onsuccess = () => {
-                    // Mettre à jour l'état pour inclure le nouveau fichier
-                    setContenusRepo((prevContenusRepo) => sortContenusRepo([...prevContenusRepo, newFile]));
-                };
+                    const updateDossierRequest = dossierData.put(dossier);
 
-                addRequest.onerror = (event) => {
-                    console.error("Erreur lors de l'ajout du fichier dans IndexedDB", event);
-                };
+                    updateDossierRequest.onsuccess = () => {
+                        // Mettre à jour l'état pour inclure le nouveau fichier
+                        setContenusRepo((prevContenusRepo) => sortContenusRepo([...prevContenusRepo, newFile]));
+                    }
+
+                    updateDossierRequest.onerror = (event) => {
+                        console.error("Erreur lors de la mise à jour du dossier dans IndexedDB", event);
+                    };
+
+                }
 
                 request.onerror = (event) => {
                     console.error("Erreur lors de l'ouverture de la base de données pour ajouter un fichier:", event);
@@ -165,7 +169,7 @@ export const Markdowns = () => {
                 id: crypto.randomUUID(),
                 nomDossier: folderName,
                 nomDeLaClasse: "dossier",
-                emplacement: 0 // Vous pouvez ajuster cela en fonction du dossier sélectionné
+                emplacement: 1 // Vous pouvez ajuster cela en fonction du dossier sélectionné
             };
             const request = indexedDB.open("markdown_repository");
 
@@ -202,32 +206,48 @@ export const Markdowns = () => {
             const request = indexedDB.open("markdown_repository");
             request.onsuccess = () => {
                 const db = request.result;
-                var store;
+                const tx = db.transaction("dossiers", "readwrite");
+                const store = tx.objectStore("dossiers");
 
-                // Determine if it's a file or a folder
-                const element = contenusRepo.find(el => el.id === id);
-                if (element.nomDeLaClasse === "fichier") {
-                    const tx = db.transaction("fichiers", "readwrite");
-                    store = tx.objectStore("fichiers");
-                    element.nom = newName;
-                } else {
-                    const tx = db.transaction("dossiers", "readwrite");
-                    store = tx.objectStore("dossiers");
-                    element.nomDossier = newName;
-                }
+                const getAllRequest = store.getAll();
 
-                const updateRequest = store.put(element);
+                getAllRequest.onsuccess = () => {
+                    const dossiers = getAllRequest.result;
+                    var objectToRename = null;
 
-                // ia
-                updateRequest.onsuccess = () => {
-                    // Update the state to reflect the new name
-                    setContenusRepo((prevContenusRepo) => sortContenusRepo(
-                        prevContenusRepo.map(el => (el.id === id ? element : el))
-                    ));
-                };
+                    // Parcourir les dossiers pour trouver le fichier ou le dossier à renommer
+                    for (const dossier of dossiers) {
+                        if (dossier.id === id) {
+                            // Si c'est un dossier à renommer
+                            objectToRename = dossier;
+                            objectToRename.nomDossier = newName;
+                            break;
+                        } else {
+                            // Si c'est un fichier à renommer
+                            const fichier = dossier.fichiers.find(file => file.id === id);
+                            if (fichier) {
+                                objectToRename = fichier;
+                                fichier.nom = newName;
+                                break;
+                            }
+                        }
+                    }
 
-                updateRequest.onerror = (event) => {
-                    console.error("Erreur lors de la mise à jour dans IndexedDB", event);
+                    if (objectToRename) {
+                        // Mettre à jour le dossier dans la base de données
+                        const updateRequest = store.put(dossiers.find(d => d.id === id) || dossiers.find(d => d.fichiers.includes(objectToRename)));
+
+                        updateRequest.onsuccess = () => {
+                            // Mettre à jour l'état pour refléter le nouveau nom
+                            setContenusRepo((prevContenusRepo) => sortContenusRepo(
+                                prevContenusRepo.map(el => (el.id === id ? objectToRename : el))
+                            ));
+                        };
+
+                        updateRequest.onerror = (event) => {
+                            console.error("Erreur lors de la mise à jour dans IndexedDB", event);
+                        };
+                    }
                 };
             };
 
@@ -246,8 +266,8 @@ export const Markdowns = () => {
                 const db = request.result;
                 var store;
 
-                // Determine if it's a file or a folder
-                const element = contenusRepo.find(el => el.id === id);
+                // Check si c'est un fichier ou un dossier
+                const element = contenusRepo.find(objet => objet.id === id);
                 if (element.nomDeLaClasse === "fichier") {
                     const tx = db.transaction("fichiers", "readwrite");
                     store = tx.objectStore("fichiers");
@@ -256,13 +276,13 @@ export const Markdowns = () => {
                     store = tx.objectStore("dossiers");
                 }
 
-                // Delete the entry from IndexedDB
+                // Supprime le fichier / dossier
                 const deleteRequest = store.delete(id);
 
                 deleteRequest.onsuccess = () => {
-                    // Update the state to remove the deleted element
+                    // Met à jour le contenus local pour l'affichage en temps reel
                     setContenusRepo((prevContenusRepo) =>
-                        prevContenusRepo.filter(el => el.id !== id)
+                        prevContenusRepo.filter(objet => objet.id !== id)
                     );
                 };
 
@@ -289,6 +309,7 @@ export const Markdowns = () => {
         <Link to="/markdown" key={4}>Markdown</Link>,
     ]
 
+    // Liste pour le clic droit
     const listActions = [
         { idAction: "add-file", action: "Nouveau Fichier" },
         { idAction: "add-folder", action: "Nouveau Dossier" },
