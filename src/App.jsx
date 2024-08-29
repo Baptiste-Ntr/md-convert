@@ -4,6 +4,7 @@ import { Home } from "./Pages/Home"
 import { Images } from "./Pages/Images"
 import { Markdowns } from "./Pages/Markdowns"
 import { MDProvider } from "./Components/Context/MDContext"
+import { FileProvider } from "./Components/Context/FileContext"
 
 function App() {
 
@@ -25,9 +26,11 @@ function App() {
 
   return (
     <>
-      <MDProvider>
-        <RouterProvider router={router} />
-      </MDProvider>
+      <FileProvider>
+        <MDProvider>
+          <RouterProvider router={router} />
+        </MDProvider>
+      </FileProvider>
     </>
   )
 }
