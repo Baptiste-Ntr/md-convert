@@ -32,10 +32,10 @@ request.onupgradeneeded = (event) => {
   }
 
   // Création du magasin d'objets pour les fichiers
-  if (!db.objectStoreNames.contains("fichiers")) {
-    const fichiersStore = db.createObjectStore("fichiers", { keyPath: "id", autoIncrement: true });
-    fichiersStore.createIndex("idDossier", "idDossier", { unique: false });
-  }
+  // if (!db.objectStoreNames.contains("fichiers")) {
+  //   const fichiersStore = db.createObjectStore("fichiers", { keyPath: "id", autoIncrement: true });
+  //   fichiersStore.createIndex("idDossier", "idDossier", { unique: false });
+  // }
 
     // Création du magasin d'objets pour les images
     if (!db.objectStoreNames.contains("images")) {
@@ -84,3 +84,4 @@ idb.onerror = function (event) {
     
 };
 
+export {idb}

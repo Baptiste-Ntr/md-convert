@@ -8,7 +8,6 @@ import { MDContext } from "../Context/MDContext"
 export const MarkdownWrite = () => {
 
     const [textValue, setTextValue] = useState()
-
     const { setMDFile, importedFile } = useContext(MDContext)
 
     useEffect(() => {
@@ -20,6 +19,7 @@ export const MarkdownWrite = () => {
             setTextValue(importedFile);
         }
     }, [importedFile]);
+    
 
     return (
         <>

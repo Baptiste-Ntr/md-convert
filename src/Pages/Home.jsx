@@ -15,12 +15,10 @@ export const Home = () => {
     ]
 
     return (
-        <MDProvider>
-            <HeaderHome />
-            <Grid2 container height={"80vh"} padding={"10px"} spacing={3}>
-                <SideBar linksList={linksList} />
-                <MarkdownWrite />
-            </Grid2>
-        </MDProvider>
+          <><HeaderHome /><Grid2 container height={"80vh"} padding={"10px"} spacing={3}>
+            <SideBar linksList={linksList} />
+            <MarkdownWrite />
+        </Grid2></>
+
     )
 }
