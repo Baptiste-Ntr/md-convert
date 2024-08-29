@@ -32,8 +32,16 @@ request.onupgradeneeded = (event) => {
     fichiersStore.createIndex("idDossier", "idDossier", { unique: false });
   }
 
+    // Création du magasin d'objets pour les images
+    if (!db.objectStoreNames.contains("images")) {
+      const imagesStore = db.createObjectStore("images", { keyPath: "id", autoIncrement: true });
+      imagesStore.createIndex("emplacement", "emplacement", { unique: false });
+    }
+  
+
 };
 
+// Fake datas
 const lesFichiers = [
   {id: 1, nom: "Fichier 1", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
   {id: 2, nom: "Fichier 2", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
@@ -44,18 +52,26 @@ const dossiers = [
   {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
 ]
 
+const mesImages = [
+  {id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"}
+]
+// ********************************************************************
+
 request.onsuccess = () => {
   console.log("Database opened successfully");
 
   const db = request.result;
 
-  var tx = db.transaction(["dossiers", "fichiers"], "readwrite");
+  var tx = db.transaction(["dossiers", "fichiers",'images'], "readwrite");
   const dossiersStore = tx.objectStore("dossiers");
   const fichiersStore = tx.objectStore("fichiers");
+  const imagesStore = tx.objectStore("images");
+
 
 
   dossiers.forEach((item) => dossiersStore.add(item));
   lesFichiers.forEach((item) => fichiersStore.add(item));
+  mesImages.forEach((item) => imagesStore.add(item));
 
   return tx.complete;
 };
