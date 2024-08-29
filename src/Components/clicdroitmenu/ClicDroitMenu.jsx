@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ClicDroitMenu = ({ xPos, yPos, showMenu, doClicAction }) => {
+const ClicDroitMenu = ({ xPos, yPos, showMenu, listActions, doClicAction }) => {
   if (!showMenu) return null;
 
   // Remonte ce qui est cliquer à la fonction doClicAction dans le App.jsx
@@ -20,10 +20,9 @@ const ClicDroitMenu = ({ xPos, yPos, showMenu, doClicAction }) => {
   return (
     <div style={monstyle}>
       <ul style={{ listStyleType: 'none', margin: 0, padding: 10 }}>
-        <li id="add-file" onClick={clicAction}>Nouveau Fichier</li>
-        <li id="add-folder" onClick={clicAction}>Nouveau Dossier</li>
-        <li id="rename" onClick={clicAction}>Renommer</li>
-        <li id="delete" onClick={clicAction}>Supprimer</li>
+        {listActions.map(({idAction, action}) => (
+          <li key={crypto.randomUUID()} id={idAction} onClick={clicAction}>{action}</li>
+        ))}
       </ul>
     </div>
   );

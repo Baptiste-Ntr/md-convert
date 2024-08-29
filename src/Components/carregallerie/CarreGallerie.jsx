@@ -1,9 +1,10 @@
-import React from 'react'
+
 
 function CarreGallerie({srcImg, nomDeLaClasse, nom, selectionner, maxWidth, styleCustom}) {
   if (selectionner) {
     console.log("coucou");
-  }  
+  }
+
 
   return (
     <div style={{styleCustom}}>

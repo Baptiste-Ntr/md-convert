@@ -23,7 +23,12 @@ request.onupgradeneeded = (event) => {
   if (!db.objectStoreNames.contains("dossiers")) {
     const dossiersStore = db.createObjectStore("dossiers", { keyPath: "id", autoIncrement: true });
     dossiersStore.createIndex("emplacement", "emplacement", { unique: false });
+    dossiersStore.createIndex("fichiers", "fichiers", { unique: false });
+    dossiersStore.createIndex("id", "id", { unique: true });
 
+    const dossierRacine = {id: 0, nomDossier: "home", fichiers: [], emplacement: 0, nomDeLaClasse: "dossier"}
+
+    dossiersStore.add(dossierRacine);
   }
 
   // Création du magasin d'objets pour les fichiers
@@ -36,49 +41,46 @@ request.onupgradeneeded = (event) => {
     if (!db.objectStoreNames.contains("images")) {
       const imagesStore = db.createObjectStore("images", { keyPath: "id", autoIncrement: true });
       imagesStore.createIndex("emplacement", "emplacement", { unique: false });
+      imagesStore.add({id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"});
     }
   
 
 };
 
-// Fake datas
-const lesFichiers = [
-  {id: 1, nom: "Fichier 1", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
-  {id: 2, nom: "Fichier 2", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
-  {id: 3, nom: "Fichier 3", nomDeLaClasse: "fichier", idDossier: 1, contenus: ""},
-]
+// // Fake datas
+// const lesFichiers = [
+//   {id: 1, nom: "Fichier 1", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
+//   {id: 2, nom: "Fichier 2", nomDeLaClasse: "fichier", idDossier: 0, contenus: ""},
+//   {id: 3, nom: "Fichier 3", nomDeLaClasse: "fichier", idDossier: 1, contenus: ""},
+// ]
 
-const dossiers = [
-  {id: 1, nomDossier: "Dossier 1", fichiers: [3], emplacement: 0}
-]
+// const dossierRacine = [
+//   {id: 0, nomDossier: "home", fichiers: [], emplacement: 0}
+// ]
 
-const mesImages = [
-  {id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"}
-]
-// ********************************************************************
+// const mesImages = [
+//   {id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"}
+// ]
 
-request.onsuccess = () => {
-  console.log("Database opened successfully");
+// request.onsuccess = () => {
+//   console.log("Database opened successfully");
+//   const db = request.result;
 
-  const db = request.result;
-
-  var tx = db.transaction(["dossiers", "fichiers",'images'], "readwrite");
-  const dossiersStore = tx.objectStore("dossiers");
-  const fichiersStore = tx.objectStore("fichiers");
-  const imagesStore = tx.objectStore("images");
+//   var tx = db.transaction(["dossiers", "fichiers"], "readwrite");
+//   const dossiersStore = tx.objectStore("dossiers");
+//   const fichiersStore = tx.objectStore("fichiers");
 
 
+//   dossiers.forEach((item) => dossiersStore.add(item));
+//   lesFichiers.forEach((item) => fichiersStore.add(item));
 
-  dossiers.forEach((item) => dossiersStore.add(item));
-  lesFichiers.forEach((item) => fichiersStore.add(item));
-  mesImages.forEach((item) => imagesStore.add(item));
-
-  return tx.complete;
-};
+//   return tx.complete;
+// };
 
 
 idb.onerror = function (event) {
     // Gestionnaire d'erreur générique pour toutes les erreurs de requêtes de cette base
-    alert("Database error: " + event.target.errorCode);
+    console.log("Database error: " + event.target.errorCode);;
+    
 };
 
