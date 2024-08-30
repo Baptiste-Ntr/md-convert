@@ -83,8 +83,19 @@ const FileTree = () => {
         setTreeKey(Date.now());  // Force également le rerender lors du drag and drop
     }, []);
 
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        // Met le menu au niveau du curseur de la souris
+        // recup l'id
+        console.log(event.target.getAttribute('data-rct-item-id'));
+        // verrifi si c'est un fichier ou un dossier
+        console.log(event.target.classList.contains('rct-tree-item-button-isFolder'));
+
+    }
+    
     return (
         <>
+        <div onClick={handleContextMenu}>
             <UncontrolledTreeEnvironment
                 key={treeKey}  // Utilisation de la clé pour forcer le rerender
                 dataProvider={dataProvider}
@@ -95,9 +106,11 @@ const FileTree = () => {
                 canReorderItems={true}
                 canRename={true}
                 onDrop={handleDrop}
+                
             >
                 <Tree treeId="tree-2" rootItem="root" treeLabel="Tree Example" />
             </UncontrolledTreeEnvironment>
+            </div>
             <Button onClick={handleAddFolder}>Add Folder</Button>
             <Button onClick={handleAddFile}>Add File</Button>
         </>
