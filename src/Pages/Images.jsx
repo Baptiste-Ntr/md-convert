@@ -4,6 +4,7 @@ import MesImages from "../Components/mesImages/MesImages";
 export const Images = () => {
     const [imgs, setImgs] = useState([]);
     const [futureImg, setFutureImg] = useState();
+    const [checkedImgs, SetCheckedImgs] = useState([]);
 
     useEffect(() => {
         const request = indexedDB.open("markdown_repository");
@@ -86,6 +87,101 @@ export const Images = () => {
         setFutureImg(null)
     }
 
+    function handleFutureImgMldc (e) {
+         const fichier = e.target.files[0];
+
+        if (fichier) {  
+            const reader = new FileReader();
+
+            // Lit le fichier
+            reader.readAsText(fichier);
+
+            reader.onload = (event) => {
+                // Stocker le content
+                let fileContent = event.target.result;
+
+                // Parse le content
+                const parsedData = JSON.parse(fileContent);
+                // Partie DB ***************************************************************************************
+                const request = indexedDB.open("markdown_repository");
+                request.onsuccess = () => {
+                    const db = request.result;
+                    var tx = db.transaction(['images'], "readwrite");
+                    const imagesStore = tx.objectStore("images");
+
+                    parsedData.forEach(img => {
+                        const addRequest = imagesStore.add(img);
+
+                        // Partie state ***************************************************************************************
+                        addRequest.onsuccess = () => {
+                            setImgs(
+                                // Array donc on utilise le spread operator et recréer un autre array (avec la nouveller image)
+                                // pour rerender le component 
+                                prevImgs => [...prevImgs, img]
+                            );
+                        };
+        
+                        addRequest.onerror = (event) => {
+                            console.error("Erreur lors de l'ajout de l'image dans IndexedDB", event);
+                        };
+                    });
+                }
+            }
+        }
+    }
+
+    function handleExport (e) {
+
+        const pickupImgs = imgs.filter((img) => 
+            checkedImgs.some((checkedImg) => img.id === checkedImg)
+        );
+
+        const futureExportedImgs =  pickupImgs.map((img) => ({nom : img.nom, srcImg : img.srcImg, }))
+        const extension = futureExportedImgs.length === 1 ? '.img.mdlc' : '.imgs.mdlc'
+        
+        let nomFichier = futureExportedImgs.length === 1 ? futureExportedImgs[0].nom : `Liste_${futureExportedImgs[0].nom}`
+
+        if (nomFichier !== 'Liste_d_images') {
+            const parties = nomFichier.split('.');
+            nomFichier = parties.slice(0, -1).join('.');
+        }
+
+        // Créer un Blob (Binary Large Object) 
+        const imgBlob = new Blob([JSON.stringify(futureExportedImgs, null, 2)], { type: 'application/json' });
+        // Créer une url
+        const imgUrl = URL.createObjectURL(imgBlob);
+        // Créer un element de DOM a
+        const imgLink = document.createElement('a');
+        // Définir le href de a
+        imgLink.href = imgUrl;
+        // Définir le nom du fichier
+        imgLink.download = `${nomFichier}${extension}`;
+        // Déclencher le téléchargement
+        imgLink.click();
+        // Supprimer l'url crée en amont
+        URL.revokeObjectURL(imgUrl);
+
+    }
+
+    function handleCheckedBox  (e) {
+        const checked = e.target.checked
+        const imgId = e.target.id;
+
+        // Récuperer les checkbox cochées
+        if (checked) {
+            SetCheckedImgs (
+                prevImgs => [...prevImgs, imgId]
+            )
+        // Supprimer du state checkedImg les checkbox plus cochées
+        } else if (checkedImgs.length !== 0 && !checked) {
+            SetCheckedImgs (
+                prevImgs => prevImgs.filter(img => img !== imgId)
+            )
+        }
+    }
+
+
+
     return (
         <>
             <MesImages 
@@ -94,7 +190,9 @@ export const Images = () => {
                 handleFutureImg={handleFutureImg} 
                 handleImg={handleImg} 
                 handleCancel={handleCancel}
-
+                handleFutureImgMldc={handleFutureImgMldc}
+                handleExport={handleExport}
+                handleCheckedBox={handleCheckedBox}
             />
         </>
     )

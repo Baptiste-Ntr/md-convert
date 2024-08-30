@@ -11,7 +11,10 @@ function MesImages({
   futureImg, 
   handleFutureImg, 
   handleImg, 
-  handleCancel
+  handleCancel,
+  handleFutureImgMldc,
+  handleExport,
+  handleCheckedBox
 }) {
 
   return (
@@ -20,7 +23,7 @@ function MesImages({
             <SideBar/>
         </div>
         <div className='containerMesImages'>
-            <HeaderImages handleFutureImg={handleFutureImg}/>
+            <HeaderImages handleFutureImg={handleFutureImg} handleFutureImgMldc={handleFutureImgMldc} handleExport={handleExport}/>
             <div  className='containerImage'>
                 <div className='previewDiv'>
                     {/* Ici prévisualisation */}
@@ -41,18 +44,22 @@ function MesImages({
                     <h2>Images stockées</h2>
                     <div className='imagesStokedDiv'>
                         {imgs.map((img) => (
-                            <>
+                            <div>
                                 <CarreGallerie key={img.id} srcImg={img.srcImg} nom={img.nom} maxWidth='20em'/>
-                            </>
+                                <div>
+                                    <label htmlFor={img.id}>Exporter ? </label>
+
+                                    {/* () => handleCheckedBox(img.id) et non handleCheckedBox(img.id) pour que la fonction se déclenche 
+                                    au changement de la checkbox */}
+                                    <input type="checkbox" name={img.id} id={img.id} onChange={handleCheckedBox}/>
+                                </div>
+                              
+                            </div>
                         ))}
                     </div>
-                    
                 </div>
             </div>
         </div>
-        
-       
-
     </div>
     
 
