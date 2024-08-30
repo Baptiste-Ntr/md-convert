@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.containerMesImages {
+    display: flex;
+    flex-direction: column;
+    padding-left: 4em
+}
+
+.containerImage {
+    width: 96em;
+    margin: auto;
+    margin-top: 1em;
+    
+}
+
+.previewDiv,
+.stockDiv {
+    padding: 2em 0;
+}
+
+.imgAndButtons {
+    text-align: center;
+}
+
+.checkBtn {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+}
+
+.futureImg {
+    width: 50em;
+    height: auto
+}
+
+.imagesStokedDiv {
+    display: flex;
+    justify-content: space-around;
+}
+  
