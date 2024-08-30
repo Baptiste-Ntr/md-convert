@@ -1,0 +1,26 @@
+.container {
+    display: flex ;   
+    
+}
+
+.containerSide {
+    flex:1 
+}
+
+.containerBloc {
+    textarea {
+        // height: 50% !important;
+        width:  50% !important;
+    }
+
+    flex:5;
+    padding-left: 2vw;
+    padding-right: 2vw;
+}
+
+.writeContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 50% !important;
+}

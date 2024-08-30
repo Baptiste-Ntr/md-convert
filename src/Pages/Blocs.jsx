@@ -5,7 +5,7 @@ import { Redaction } from '../Components/convert/Redaction';
 import { RenderMD } from '../Components/convert/RenderMD';
 import { idb } from '../db/indexedDB';
 import { SideBar } from '../Components/SideBar/SideBar';
-import "./Blocs.css"
+import "./Blocs.scss"
 
 export const Blocs = () => {
     const [shortcuts, setShortcuts] = useState([]);
@@ -190,10 +190,13 @@ export const Blocs = () => {
 
     return (
         <>
-            <div clasName={"container"}>
-                <SideBar />
+            <div className="container">
+                <div className="containerItem containerSide">
+                    <SideBar />
+                </div>
 
-                <div clasName={"containerBloc"}>
+
+                <div className="containerItem containerBloc">
                     <h1>Blocs</h1>
                     <TextField
                         label="Nom du raccourci"
@@ -209,11 +212,13 @@ export const Blocs = () => {
                         fullWidth
                         margin="normal"
                     />
+                    <div className='writeContainer'>
                     <Redaction
                         redacValue={setNewContent}
                         initialValue={newContent}
                     />
                     <RenderMD value={newContent} />
+                    </div>
                     <Button
                         variant="contained"
                         onClick={handleAddShortcut}
@@ -222,54 +227,52 @@ export const Blocs = () => {
                     >
                         Créer le raccourci
                     </Button>
-                </div>
-            </div>
-            <div>
-                {shortcuts.map((shortcut) => (
-                    <div key={shortcut.id}>
-                        <ShortcutItem
-                            shortcut={shortcut}
-                            onEdit={() => handleEditShortcut(shortcut)}
-                            onDelete={() => handleDeleteShortcut(shortcut)}
-                        />
+                    <div>
+                        {shortcuts.map((shortcut) => (
+                            <div key={shortcut.id}>
+                                <ShortcutItem
+                                    shortcut={shortcut}
+                                    onEdit={() => handleEditShortcut(shortcut)}
+                                    onDelete={() => handleDeleteShortcut(shortcut)}
+                                />
+                            </div>
+                        ))}
                     </div>
-                ))}
+                    {isModalOpen && (
+                        <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                            <Box style={{ padding: '20px', backgroundColor: 'white', margin: '10% auto', maxWidth: '600px' }}>
+                                <h2>Modifier le contenu du raccourci</h2>
+                                <Grid2 container spacing={2}>
+                                    <Grid2 item xs={12} md={6}>
+                                        <TextField
+                                            label="Nom du raccourci"
+                                            value={editingShortcut.nom}
+                                            onChange={(e) => setEditingShortcut({ ...editingShortcut, nom: e.target.value })}
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Touches associées"
+                                            value={editingShortcut.touches}
+                                            onKeyDown={(e) => handleKeyDown(e, (touches) => setEditingShortcut({ ...editingShortcut, touches }))}
+                                            fullWidth
+                                        />
+                                    </Grid2>
+                                        <Redaction
+                                            redacValue={setCurrentContent}
+                                            initialValue={currentContent}
+                                        />
+                                        <RenderMD value={currentContent} />
+                                </Grid2>
+                                <Button variant="contained" onClick={handleSaveContent} style={{ marginTop: '10px' }}>
+                                    Enregistrer
+                                </Button>
+                            </Box>
+                        </Modal>
+                    )}
+                </div>
+
+
             </div>
-            {isModalOpen && (
-                <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <Box style={{ padding: '20px', backgroundColor: 'white', margin: '10% auto', maxWidth: '600px' }}>
-                        <h2>Modifier le contenu du raccourci</h2>
-                        <Grid2 container spacing={2}>
-                            <Grid2 item xs={12} md={6}>
-                                <TextField
-                                    label="Nom du raccourci"
-                                    value={editingShortcut.nom}
-                                    onChange={(e) => setEditingShortcut({ ...editingShortcut, nom: e.target.value })}
-                                    fullWidth
-                                />
-                                <TextField
-                                    label="Touches associées"
-                                    value={editingShortcut.touches}
-                                    onKeyDown={(e) => handleKeyDown(e, (touches) => setEditingShortcut({ ...editingShortcut, touches }))}
-                                    fullWidth
-                                />
-                            </Grid2>
-                            <Grid2 item xs={12} md={6}>
-                                <Redaction
-                                    redacValue={setCurrentContent}
-                                    initialValue={currentContent}
-                                />
-                            </Grid2>
-                            <Grid2 item xs={12} md={6}>
-                                <RenderMD value={currentContent} />
-                            </Grid2>
-                        </Grid2>
-                        <Button variant="contained" onClick={handleSaveContent} style={{ marginTop: '10px' }}>
-                            Enregistrer
-                        </Button>
-                    </Box>
-                </Modal>
-            )}
         </>
     );
 };
