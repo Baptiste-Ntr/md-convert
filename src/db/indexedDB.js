@@ -16,12 +16,14 @@ request.onerror = (event) => {
 };
 
 // Cet évènement est seulement implémenté dans des navigateurs récents
-request.onupgradeneeded = (event) => {
+request.onupgradeneeded = () => {
   const db = request.result;
 
     // Création du magasin d'objets pour les dossiers
   if (!db.objectStoreNames.contains("dossiers")) {
     const dossiersStore = db.createObjectStore("dossiers", { keyPath: "id", autoIncrement: true });
+    const fichiersStore = db.createObjectStore("fichiers", { keyPath: "id", autoIncrement: true });
+    fichiersStore.createIndex("idDossier", "idDossier", { unique: false });
     dossiersStore.createIndex("emplacement", "emplacement", { unique: false });
     dossiersStore.createIndex("fichiers", "fichiers", { unique: false });
     dossiersStore.createIndex("id", "id", { unique: true });

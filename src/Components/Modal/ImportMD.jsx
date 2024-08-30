@@ -2,7 +2,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/
 import propTypes from "prop-types"
 import { useContext, useState } from "react"
 import { MDContext } from "../Context/MDContext"
-import { idb } from "../../db/indexedDB"
 
 export const ImportMD = ({ title }) => {
 
@@ -12,42 +11,15 @@ export const ImportMD = ({ title }) => {
 
     const { setImportedFile } = useContext(MDContext)
 
-    const insertIntoIndexedDB = (fileContent, fileName) => {
-        const request = idb.open("markdown_repository")
-
-        // Si l'ouverture (connection) c'est bien réalisé alors on commence les transacitons
-        request.onsuccess = () => {
-            // Recupère la bdd
-            const db = request.result;
-            const tx = db.transaction(["dossiers"], "readwrite");
-            const dossierData = tx.objectStore("dossiers");
-            const dossierRacine = dossierData.index('id').get(0);
-
-            dossierRacine.onsuccess = () => {
-                const newFile = {
-                    id: crypto.randomUUID(),
-                    nom: fileName,
-                    nomDeLaClasse: "fichier",
-                    idDossier: 0,
-                    contenu: fileContent,
-                };
-    
-                const dossier = dossierRacine.result
-                dossier.fichiers.push(newFile)
-
-                const updateDossierRequest = dossierData.put(dossier);
-
-                updateDossierRequest.onerror = (event) => {
-                    console.error("Erreur lors de la mise à jour du dossier dans IndexedDB", event);
-                };
-
-            }
-
-            request.onerror = (event) => {
-                console.error("Erreur lors de l'ouverture de la base de données pour ajouter un fichier:", event);
-            };
+    const insertIntoIndexedDB = async (fileContent, fileName) => {
+        // Ouvrir la base de données avec la version appropriée pour déclencher onupgradeneeded si nécessaire
+        try {
+            localStorage.setItem(fileName, fileContent)
+            console.log('File:', fileName, 'Content:', fileContent)
+        } catch (error) {
+            console.error('Error:', error)
         }
-    }
+    };
 
     return (
         <>
@@ -70,6 +42,8 @@ export const ImportMD = ({ title }) => {
                             insertIntoIndexedDB(reader.result, file.name)
                         }
                         reader.readAsText(file)
+                        setModal({ open: false })
+                        window.location.reload()
                     })
                 }}
             >
