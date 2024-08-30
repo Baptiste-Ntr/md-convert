@@ -6,6 +6,7 @@ export const LinkList = () => {
         <ListItem style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
             <Link to={"/"}>Home</Link>
             <Link to={"/images"}>Images</Link>
+            <Link to={"/blocs"}>Bloc Perso</Link>
         </ListItem>
     )
 }

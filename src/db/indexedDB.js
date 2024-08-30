@@ -45,6 +45,14 @@ request.onupgradeneeded = () => {
       imagesStore.createIndex("emplacement", "emplacement", { unique: false });
       imagesStore.add({id: 1, nom:"TOTO", srcImg: "", alt:"Exemple"});
     }
+    
+    // Création du magasin d'objets pour les raccourcis
+    if (!db.objectStoreNames.contains("raccourcis")) {
+      const shortcutStore = db.createObjectStore("raccourcis", { keyPath: "id", autoIncrement: true });
+      shortcutStore.createIndex("nom", "nom", { unique: false });
+      shortcutStore.createIndex("id", "id", { unique: false });
+      shortcutStore.add({id: 1, nom:"Mon raccourci", touches: "Ctrl+L", contenus:"## Coucou"});
+    }
   
 
 };
