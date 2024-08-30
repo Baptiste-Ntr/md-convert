@@ -5,7 +5,7 @@ import { Redaction } from '../Components/convert/Redaction';
 import { RenderMD } from '../Components/convert/RenderMD';
 import { idb } from '../db/indexedDB';
 import { SideBar } from '../Components/SideBar/SideBar';
-import "./block.css"
+import "./Blocs.css"
 
 export const Blocs = () => {
     const [shortcuts, setShortcuts] = useState([]);
@@ -192,36 +192,37 @@ export const Blocs = () => {
         <>
             <div clasName={"container"}>
                 <SideBar />
-            </div>
-            <div clasName={"containerBloc"}>
-                <h1>Blocs</h1>
-                <TextField
-                    label="Nom du raccourci"
-                    value={newShortcutName}
-                    onChange={(e) => setNewShortcutName(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
-                    label="Combinaisons de touche associées (Ctrl, Shift, Alt + une autre touche)"
-                    value={newShortcutKeys}
-                    onKeyDown={(e) => handleKeyDown(e, setNewShortcutKeys)}
-                    fullWidth
-                    margin="normal"
-                />
-                <Redaction
-                    redacValue={setNewContent}
-                    initialValue={newContent}
-                />
-                <RenderMD value={newContent} />
-                <Button
-                    variant="contained"
-                    onClick={handleAddShortcut}
-                    disabled={!newShortcutName || !newShortcutKeys || !newContent}
-                    style={{ marginTop: '10px' }}
-                >
-                    Créer le raccourci
-                </Button>
+
+                <div clasName={"containerBloc"}>
+                    <h1>Blocs</h1>
+                    <TextField
+                        label="Nom du raccourci"
+                        value={newShortcutName}
+                        onChange={(e) => setNewShortcutName(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Combinaisons de touche associées (Ctrl, Shift, Alt + une autre touche)"
+                        value={newShortcutKeys}
+                        onKeyDown={(e) => handleKeyDown(e, setNewShortcutKeys)}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <Redaction
+                        redacValue={setNewContent}
+                        initialValue={newContent}
+                    />
+                    <RenderMD value={newContent} />
+                    <Button
+                        variant="contained"
+                        onClick={handleAddShortcut}
+                        disabled={!newShortcutName || !newShortcutKeys || !newContent}
+                        style={{ marginTop: '10px' }}
+                    >
+                        Créer le raccourci
+                    </Button>
+                </div>
             </div>
             <div>
                 {shortcuts.map((shortcut) => (
