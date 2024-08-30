@@ -1,160 +1,269 @@
-import React, { useState, useContext } from 'react';
-import { Button, TextField, Grid2, Modal, Box  } from '@mui/material';
-import { MarkdownWrite } from '../Components/convert/MarkdownWrite';
-import { MDContext } from "../Components/Context/MDContext";
+import React, { useState, useEffect } from 'react';
+import { Button, Modal, TextField, Box, Grid2 } from '@mui/material';
+import ShortcutItem from '../Components/Modal/ShortcutItem'
+import { Redaction } from '../Components/convert/Redaction';
+import { RenderMD } from '../Components/convert/RenderMD';
+import { idb } from '../db/indexedDB';
 
 export const Blocs = () => {
-    const [shortcutName, setShortcutName] = useState('');
-    const [shortcutKeys, setShortcutKeys] = useState([]);
     const [shortcuts, setShortcuts] = useState([]);
-    const [selectedShortcut, setSelectedShortcut] = useState(null);
+    const [newShortcutName, setNewShortcutName] = useState('');
+    const [newShortcutKeys, setNewShortcutKeys] = useState('');
+    const [newContent, setNewContent] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingShortcut, setEditingShortcut] = useState(null);
+    const [currentContent, setCurrentContent] = useState('');
 
+    // Charge la data au premier appel de la page
+    useEffect(() => {
+        const request = indexedDB.open("markdown_repository");
 
-    const { setMDFile, mdFile } = useContext(MDContext);
+        request.onsuccess = () => {
+            const db = request.result;
 
-    const handleShortcutNameChange = (event) => {
-        setShortcutName(event.target.value);
-    };
+            const tx = db.transaction("raccourcis", "readonly");
+            const raccourcisData = tx.objectStore("raccourcis").getAll();
 
-    const handleShortcutKeyChange = (event) => {
-        event.preventDefault();
-        const key = event.key;
+            raccourcisData.onsuccess = (query) => {
+                const raccourcis = query.target.result;
+                setShortcuts([...raccourcis]);
+            };
 
-        if (['Shift', 'Control', 'Alt', 'Meta'].includes(key) && shortcutKeys.includes(key)) {
-            return;
-        }
-
-        if (!shortcutKeys.includes(key)) {
-            setShortcutKeys((prevKeys) => [...prevKeys, key]);
-        }
-    };
-
-    const handleSaveShortcut = () => {  
-        console.log(mdFile);
-        
-        const newShortcut = {
-            id: Date.now(),
-            name: shortcutName,
-            key: shortcutKeys.join('+'),
-            content: mdFile,
+            raccourcisData.onerror = (event) => {
+                console.error("Erreur lors de la récupération des raccourcis:", event);
+            };
         };
-        console.log(newShortcut);
-        
-        setShortcuts([...shortcuts, newShortcut]);
-        setShortcutName('');
-        setShortcutKeys([]);
-        setMDFile('');
+
+        request.onerror = (event) => {
+            console.error("Erreur lors de l'ouverture de la base de données:", event);
+        };
+    }, []); // Le useEffect s'exécute lorsque isComponentReady devient true
+
+
+    const handleKeyDown = (event, setKeys) => {
+        let keyCombination = '';
+
+        if (event.ctrlKey) {
+            keyCombination += 'Ctrl+';
+        }
+        if (event.shiftKey) {
+            keyCombination += 'Shift+';
+        }
+        if (event.altKey) {
+            keyCombination += 'Alt+';
+        }
+
+        if (event.key !== 'Control' && event.key !== 'Shift' && event.key !== 'Alt') {
+            keyCombination += event.key;
+        }
+
+        if (keyCombination.includes('+')) {
+            setKeys(keyCombination);
+        } else {
+            setKeys('');
+        }
+
+        event.preventDefault();
     };
 
-    const handleClearShortcutKeys = () => {
-        setShortcutKeys([]);
+    const handleDeleteShortcut = (shortcut) => {
+        console.log(shortcut);
+        const isConfirmed = confirm("Êtes-vous sûr de vouloir supprimer le raccouci " + (shortcut.nom) + " ?");
+        if (!isConfirmed) return;
+
+        const request = idb.open("markdown_repository");
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("raccourcis", "readwrite");
+            const deleteRequest = tx.objectStore("raccourcis").delete(shortcut.id);
+            // Supprime le fichier / dossier
+
+            deleteRequest.onsuccess = () => {
+                // Met à jour le contenus local pour l'affichage en temps reel
+                setShortcuts(shortcuts.filter(sc => sc.id !== shortcut.id));
+            };
+
+            deleteRequest.onerror = (event) => {
+                console.error("Erreur lors de la suppression dans IndexedDB", event);
+            };
+
+        };
+
+        request.onerror = (event) => {
+            console.error("Erreur lors de l'ouverture de la base de données pour renommer un élément:", event);
+        };
+    };
+
+
+    const handleAddShortcut = () => {
+        const newShortcut = {
+            id: crypto.randomUUID(),
+            nom: newShortcutName,
+            touches: newShortcutKeys,
+            contenus: newContent
+        };
+
+        const request = idb.open("markdown_repository");
+
+        // Si l'ouverture (connection) c'est bien réalisé alors on commence les transacitons
+        request.onsuccess = () => {
+            // Recupère la bdd
+            const db = request.result;
+            const tx = db.transaction(["raccourcis"], "readwrite");
+            const raccourcisData = tx.objectStore("raccourcis");
+
+            const addShortcutRequest = raccourcisData.add(newShortcut);
+
+            addShortcutRequest.onsuccess = () => {
+                // Mettre à jour l'état pour inclure le nouveau fichier
+                setShortcuts([...shortcuts, newShortcut]);
+                setNewShortcutName('');
+                setNewShortcutKeys('');
+                setNewContent('');
+            }
+
+            addShortcutRequest.onerror = (event) => {
+                console.error("Erreur lors de l'ouverture de la base de données pour ajouter un fichier:", event);
+            };
+        }
     };
 
     const handleEditShortcut = (shortcut) => {
-        setShortcutName(shortcut.name);
-        setShortcutKeys(shortcut.key.split('+'));
-        console.log(shortcut);
-        
-        setMDFile(shortcut.content);
-        setSelectedShortcut(shortcut);
+        setEditingShortcut(shortcut);
+        setCurrentContent(shortcut.contenus);
         setIsModalOpen(true);
     };
 
-    const handleSaveEditedShortcut = () => {
-        const updatedShortcuts = shortcuts.map((sc) =>
-            sc.id === selectedShortcut.id
-                ? { ...sc, name: shortcutName, key: shortcutKeys.join('+'), content: mdFile }
-                : sc
-        );
-        setShortcuts(updatedShortcuts);
-        setIsModalOpen(false);
-        setShortcutName('');
-        setShortcutKeys([]);
-        // setImportedFile('');
-        setMDFile('');
-    };
+    const handleSaveContent = () => {
 
-    const handleDeleteShortcut = (shortcutId) => {
-        const updatedShortcuts = shortcuts.filter((sc) => sc.id !== shortcutId);
-        setShortcuts(updatedShortcuts);
+        const request = idb.open("markdown_repository");
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("raccourcis", "readwrite");
+            const store = tx.objectStore("raccourcis");
+            const leRaccourci = store.get(editingShortcut.id);
+            console.log(editingShortcut);
+            
+
+            leRaccourci.onsuccess = () => {
+                var raccouci = leRaccourci.result
+                raccouci = {
+                    id: raccouci.id,
+                    nom: editingShortcut.nom,
+                    touches: editingShortcut.touches,
+                    contenus: currentContent
+                }            
+
+                console.log(raccouci);
+                
+
+                const updateRequest = store.put(raccouci);
+
+                updateRequest.onsuccess = () => {
+                    setShortcuts(shortcuts.map(sc =>
+                        sc.id === editingShortcut.id
+                            ? { ...sc, contenus: currentContent, nom: editingShortcut.nom, touches: editingShortcut.touches }
+                            : sc
+                    ));
+                    setIsModalOpen(false);
+                    setEditingShortcut(null);
+                    setCurrentContent('');
+                };
+
+                updateRequest.onerror = (event) => {
+                    console.error("Erreur lors de la mise à jour dans IndexedDB", event);
+                };
+            }
+
+            leRaccourci.onerror= (event) => {
+                console.error("Erreur lors de la requette pour trouver le raccouci :", event);
+            };
+        };
+
+        request.onerror = (event) => {
+            console.error("Erreur lors de l'ouverture de la base de données pour renommer un élément:", event);
+        };
+
     };
 
     return (
         <>
             <h1>Blocs</h1>
-            <Grid2 container spacing={2}>
-                <Grid2 item xs={12}>
-                    <TextField
-                        label="Nom du raccourci"
-                        value={shortcutName}
-                        onChange={handleShortcutNameChange}
-                        fullWidth
-                    />
-                </Grid2>
-                <Grid2 item xs={12}>
-                    <TextField
-                        label="Saisissez le raccourci"
-                        value={shortcutKeys.join('+')}
-                        onKeyDown={handleShortcutKeyChange}
-                        onKeyUp={(e) => e.preventDefault()}
-                        fullWidth
-                    />
-                    <Button onClick={handleClearShortcutKeys} variant="outlined" color="secondary" style={{ marginTop: '10px' }}>
-                        Effacer le raccourci
-                    </Button>
-                </Grid2>
-                <Grid2 item xs={12}>
-                    <MarkdownWrite />
-                </Grid2>
-                <Grid2 item xs={12}>
-                    <Button onClick={selectedShortcut ? handleSaveEditedShortcut : handleSaveShortcut} variant="contained" color="primary">
-                        {selectedShortcut ? 'Enregistrer les modifications' : 'Enregistrer le raccourci'}
-                    </Button>
-                </Grid2>
-            </Grid2>
-            <h2>Raccourcis enregistrés</h2>
-            <ul>
-                {shortcuts.map((shortcut) => (
-                    <li key={shortcut.id}>
-                        <strong>{shortcut.name}</strong> ({shortcut.key})
-                        <Button onClick={() => handleEditShortcut(shortcut)} variant="outlined" color="primary" style={{ marginLeft: '10px' }}>
-                            Modifier
-                        </Button>
-                        <Button onClick={() => handleDeleteShortcut(shortcut.id)} variant="outlined" color="secondary" style={{ marginLeft: '10px' }}>
-                            Supprimer
-                        </Button>
-                    </li>
-                ))}
-            </ul>
-
-            <Modal
-                open={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 600,
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}
+            <div>
+                <TextField
+                    label="Nom du raccourci"
+                    value={newShortcutName}
+                    onChange={(e) => setNewShortcutName(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                />
+                <TextField
+                    label="Combinaisons de touche associées (Ctrl, Shift, Alt + une autre touche)"
+                    value={newShortcutKeys}
+                    onKeyDown={(e) => handleKeyDown(e, setNewShortcutKeys)}
+                    fullWidth
+                    margin="normal"
+                />
+                <Redaction
+                    redacValue={setNewContent}
+                    initialValue={newContent}
+                />
+                <RenderMD value={newContent} />
+                <Button
+                    variant="contained"
+                    onClick={handleAddShortcut}
+                    disabled={!newShortcutName || !newShortcutKeys || !newContent}
+                    style={{ marginTop: '10px' }}
                 >
-                    <h2>Modifier le contenu du raccourci</h2>
-                    <MarkdownWrite />
-                    <Button onClick={handleSaveEditedShortcut} variant="contained" color="primary" style={{ marginTop: '10px' }}>
-                        Enregistrer
-                    </Button>
-                </Box>
-            </Modal>
+                    Créer le raccourci
+                </Button>
+            </div>
+            <div>
+                {shortcuts.map((shortcut) => (
+                    <div key={shortcut.id}>
+                        <ShortcutItem
+                            shortcut={shortcut}
+                            onEdit={() => handleEditShortcut(shortcut)}
+                            onDelete={() => handleDeleteShortcut(shortcut)}
+                        />
+                    </div>
+                ))}
+            </div>
+            {isModalOpen && (
+                <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                    <Box style={{ padding: '20px', backgroundColor: 'white', margin: '10% auto', maxWidth: '600px' }}>
+                        <h2>Modifier le contenu du raccourci</h2>
+                        <Grid2 container spacing={2}>
+                            <Grid2 item xs={12} md={6}>
+                                <TextField
+                                    label="Nom du raccourci"
+                                    value={editingShortcut.nom}
+                                    onChange={(e) => setEditingShortcut({ ...editingShortcut, nom: e.target.value })}
+                                    fullWidth
+                                />
+                                <TextField
+                                    label="Touches associées"
+                                    value={editingShortcut.touches}
+                                    onKeyDown={(e) => handleKeyDown(e, (touches) => setEditingShortcut({ ...editingShortcut, touches }))}
+                                    fullWidth
+                                />
+                            </Grid2>
+                            <Grid2 item xs={12} md={6}>
+                                <Redaction
+                                    redacValue={setCurrentContent}
+                                    initialValue={currentContent}
+                                />
+                            </Grid2>
+                            <Grid2 item xs={12} md={6}>
+                                <RenderMD value={currentContent} />
+                            </Grid2>
+                        </Grid2>
+                        <Button variant="contained" onClick={handleSaveContent} style={{ marginTop: '10px' }}>
+                            Enregistrer
+                        </Button>
+                    </Box>
+                </Modal>
+            )}
         </>
     );
-
 };

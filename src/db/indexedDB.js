@@ -48,6 +48,7 @@ request.onupgradeneeded = (event) => {
     if (!db.objectStoreNames.contains("raccourcis")) {
       const shortcutStore = db.createObjectStore("raccourcis", { keyPath: "id", autoIncrement: true });
       shortcutStore.createIndex("nom", "nom", { unique: false });
+      shortcutStore.createIndex("id", "id", { unique: false });
       shortcutStore.add({id: 1, nom:"Mon raccourci", touches: "Ctrl+L", contenus:"## Coucou"});
     }
   
