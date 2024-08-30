@@ -1,77 +1,92 @@
-import { useContext, useEffect, useMemo } from 'react';
-import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
+// Librairie react-complex-tree, avec un peu d'aide de chatgpt pour forcer le composant a se re-render a cause de la gestion de react-complex-tree qui ne se met pas a jour lors de l'ajout d'un dossier ou d'un fichier.
 
+import { useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import './FileTree.scss';
 import { Button } from '@mui/material';
 import { FileContext } from '../Context/FileContext';
 
-// Librairie react-complex-tree
-
 const FileTree = () => {
+    const { setFileTree, baseFileTree } = useContext(FileContext);
+    const [items, setItems] = useState({});
+    // TreeKey est la pour obliger le composant a se rerender lors de l'ajout d'un dossier ou d'un fichier
+    const [treeKey, setTreeKey] = useState(Date.now());
 
-    const { setFileTree } = useContext(FileContext)
+    console.log('Items:', items);
+    console.log('BaseFileTree:', baseFileTree);
 
-    const items = useMemo(() => ({
-        root: {
-            isFolder: true,
-            index: 'root',
-            children: ['child1', 'child2', 'child3'],
-            data: 'Root item',
-        },
-        child1: {
-            isFolder: true,
-            index: 'child1',
-            children: [],
-            data: 'Child item 1',
-        },
-        child2: {
-            isFolder: true,
-            index: 'child2',
-            children: [],
-            data: 'Child item 2',
-        },
-        child3: {
-            isFolder: true,
-            index: 'child3',
-            children: ['child4'],
-            data: 'Child item 3',
-        },
-        child4: {
-            index: 'child4',
-            children: [],
-            data: 'Child item 4',
-        },
-    }), []);
-
+    useEffect(() => {
+        if (baseFileTree) {
+            setItems(baseFileTree);
+        }
+    }, [baseFileTree]);
 
     const dataProvider = useMemo(
         () => new StaticTreeDataProvider(items, (item, data) => ({ ...item, data })),
         [items]
-    )
-
-
-    const handleAddFolder = () => {
-        const rand = `${Math.random()}`
-        items[rand] = { data: "New Folder", index: rand, isFolder: true, children: [] }
-        items.root.children.push(rand)
-        dataProvider.onDidChangeTreeDataEmitter.emit(['root'])
-    };
-
-    const handleAddFile = () => {
-        const rand = `${Math.random()}`
-        items[rand] = { data: "New File", index: rand, isFolder: false }
-        items.root.children.push(rand)
-        dataProvider.onDidChangeTreeDataEmitter.emit(['root'])
-    }
+    );
 
     useEffect(() => {
-        setFileTree(items)
-        console.log("items", items)
-        console.log('Provider', dataProvider)
-    }, [items, setFileTree, dataProvider])
+        setFileTree(items);
+    }, [items, setFileTree]);
+
+    const handleAddFolder = useCallback(() => {
+        const rand = `${Math.random()}`;
+        setItems(prevItems => {
+            const newItems = { ...prevItems };
+            newItems[rand] = { data: "New Folder", index: rand, isFolder: true, children: [] };
+            if (newItems.root) {
+                newItems.root.children = [...newItems.root.children, rand];
+            } else {
+                throw new Error("Root item not found in handleFolder");
+            }
+            return newItems;
+        });
+        setTreeKey(Date.now());  // Change la clé pour forcer le rerender du composant Tree
+    }, []);
+
+    const handleAddFile = useCallback(() => {
+        const rand = `${Math.random()}`;
+        setItems(prevItems => {
+            const newItems = { ...prevItems };
+            newItems[rand] = { data: "New File", index: rand, isFolder: false };
+            if (newItems.root) {
+                newItems.root.children = [...newItems.root.children, rand];
+            } else {
+                throw new Error("Root item not found in handleFile");
+            }
+            return newItems;
+        });
+        setTreeKey(Date.now());  // Change la clé pour forcer le rerender du composant Tree
+    }, []);
+
+    const handleDrop = useCallback((newItems, dragSourceId, dropTargetId, index) => {
+        setItems(prevItems => {
+            const updatedItems = { ...prevItems };
+
+            const sourceParent = Object.values(updatedItems).find(item =>
+                item.children?.includes(dragSourceId)
+            );
+
+            if (!sourceParent) return updatedItems;
+
+            sourceParent.children = sourceParent.children.filter(id => id !== dragSourceId);
+
+            if (dropTargetId) {
+                updatedItems[dropTargetId].children.splice(index, 0, dragSourceId);
+            } else {
+                updatedItems.root.children.splice(index, 0, dragSourceId);
+            }
+
+            return updatedItems;
+        });
+        setTreeKey(Date.now());  // Force également le rerender lors du drag and drop
+    }, []);
+
     return (
         <>
             <UncontrolledTreeEnvironment
+                key={treeKey}  // Utilisation de la clé pour forcer le rerender
                 dataProvider={dataProvider}
                 getItemTitle={item => item.data}
                 viewState={{}}
@@ -79,6 +94,7 @@ const FileTree = () => {
                 canDropOnFolder={true}
                 canReorderItems={true}
                 canRename={true}
+                onDrop={handleDrop}
             >
                 <Tree treeId="tree-2" rootItem="root" treeLabel="Tree Example" />
             </UncontrolledTreeEnvironment>
