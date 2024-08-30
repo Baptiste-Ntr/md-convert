@@ -5,6 +5,7 @@ import { Redaction } from '../Components/convert/Redaction';
 import { RenderMD } from '../Components/convert/RenderMD';
 import { idb } from '../db/indexedDB';
 import { SideBar } from '../Components/SideBar/SideBar';
+import "./block.css"
 
 export const Blocs = () => {
     const [shortcuts, setShortcuts] = useState([]);
@@ -189,12 +190,11 @@ export const Blocs = () => {
 
     return (
         <>
-            <div>
+            <div clasName={"container"}>
                 <SideBar />
             </div>
-            <h1>Blocs</h1>
-
-            <div>
+            <div clasName={"containerBloc"}>
+                <h1>Blocs</h1>
                 <TextField
                     label="Nom du raccourci"
                     value={newShortcutName}

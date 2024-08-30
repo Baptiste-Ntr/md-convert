@@ -1,0 +1,10 @@
+.container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.containerBloc {
+    display: flex;
+    flex-direction: column;
+    padding-left: 4em
+}
