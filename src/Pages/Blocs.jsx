@@ -4,6 +4,7 @@ import ShortcutItem from '../Components/Modal/ShortcutItem'
 import { Redaction } from '../Components/convert/Redaction';
 import { RenderMD } from '../Components/convert/RenderMD';
 import { idb } from '../db/indexedDB';
+import { SideBar } from '../Components/SideBar/SideBar';
 
 export const Blocs = () => {
     const [shortcuts, setShortcuts] = useState([]);
@@ -143,7 +144,7 @@ export const Blocs = () => {
             const store = tx.objectStore("raccourcis");
             const leRaccourci = store.get(editingShortcut.id);
             console.log(editingShortcut);
-            
+
 
             leRaccourci.onsuccess = () => {
                 var raccouci = leRaccourci.result
@@ -152,10 +153,10 @@ export const Blocs = () => {
                     nom: editingShortcut.nom,
                     touches: editingShortcut.touches,
                     contenus: currentContent
-                }            
+                }
 
                 console.log(raccouci);
-                
+
 
                 const updateRequest = store.put(raccouci);
 
@@ -175,7 +176,7 @@ export const Blocs = () => {
                 };
             }
 
-            leRaccourci.onerror= (event) => {
+            leRaccourci.onerror = (event) => {
                 console.error("Erreur lors de la requette pour trouver le raccouci :", event);
             };
         };
@@ -188,7 +189,11 @@ export const Blocs = () => {
 
     return (
         <>
+            <div>
+                <SideBar />
+            </div>
             <h1>Blocs</h1>
+
             <div>
                 <TextField
                     label="Nom du raccourci"
