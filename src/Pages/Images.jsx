@@ -11,7 +11,7 @@ export const Images = () => {
         request.onsuccess = () => {
             // Recupère la bdd
             const db = request.result;
-        
+
             // Récupérer les dossiers avec 'emplacement: 0' & les fichiers avec 'idDossier: 0'
             const tx = db.transaction(["images"], "readonly");
 
@@ -23,19 +23,19 @@ export const Images = () => {
 
             // Si la requette à réussi
             imagesRequest.onsuccess = (query) => {
-                 // Récupère le résultat de la requette
-                 const imageResult = query.target.result;
-                 // setImgs dans imgs les images
-                 setImgs([...imageResult])
+                // Récupère le résultat de la requette
+                const imageResult = query.target.result;
+                // setImgs dans imgs les images
+                setImgs([...imageResult])
             }
 
             imagesRequest.onerror = (event) => {
                 console.error("Erreur lors de la récupération des images:", event);
             };
         }
-    },[])
+    }, [])
 
-    function handleFutureImg (e) {
+    function handleFutureImg(e) {
         const file = e.target.files[0];
 
         if (file) {
@@ -44,23 +44,23 @@ export const Images = () => {
 
             // Lit de fichier et le converti en Base64
             reader.readAsDataURL(file);
-            
+
             // Initialise l'event de fin de lecture du fichier
             reader.onloadend = () => {
                 // Quand le fichier est lu, on set 
-                const image = { id : crypto.randomUUID(), srcImg : reader.result, nom : file.name }
+                const image = { id: crypto.randomUUID(), srcImg: reader.result, nom: file.name }
                 setFutureImg(image);
             };
         }
     }
 
-    function handleImg (e) {
+    function handleImg(e) {
         if (futureImg) {
             const request = indexedDB.open("markdown_repository");
             request.onsuccess = () => {
                 // Recupère la bdd
                 const db = request.result;
-                
+
                 var tx = db.transaction(['images'], "readwrite");
                 const imagesStore = tx.objectStore("images");
 
@@ -83,14 +83,14 @@ export const Images = () => {
         }
     };
 
-    function handleCancel (e) {
+    function handleCancel(e) {
         setFutureImg(null)
     }
 
-    function handleFutureImgMldc (e) {
-         const fichier = e.target.files[0];
+    function handleFutureImgMldc(e) {
+        const fichier = e.target.files[0];
 
-        if (fichier) {  
+        if (fichier) {
             const reader = new FileReader();
 
             // Lit le fichier
@@ -120,7 +120,7 @@ export const Images = () => {
                                 prevImgs => [...prevImgs, img]
                             );
                         };
-        
+
                         addRequest.onerror = (event) => {
                             console.error("Erreur lors de l'ajout de l'image dans IndexedDB", event);
                         };
@@ -130,15 +130,15 @@ export const Images = () => {
         }
     }
 
-    function handleExport (e) {
+    function handleExport(e) {
 
-        const pickupImgs = imgs.filter((img) => 
+        const pickupImgs = imgs.filter((img) =>
             checkedImgs.some((checkedImg) => img.id === checkedImg)
         );
 
-        const futureExportedImgs =  pickupImgs.map((img) => ({nom : img.nom, srcImg : img.srcImg, }))
+        const futureExportedImgs = pickupImgs.map((img) => ({ nom: img.nom, srcImg: img.srcImg, }))
         const extension = futureExportedImgs.length === 1 ? '.img.mdlc' : '.imgs.mdlc'
-        
+
         let nomFichier = futureExportedImgs.length === 1 ? futureExportedImgs[0].nom : `Liste_${futureExportedImgs[0].nom}`
 
         if (nomFichier !== 'Liste_d_images') {
@@ -163,36 +163,109 @@ export const Images = () => {
 
     }
 
-    function handleCheckedBox  (e) {
+    function handleCheckedBox(e) {
         const checked = e.target.checked
         const imgId = e.target.id;
 
         // Récuperer les checkbox cochées
         if (checked) {
-            SetCheckedImgs (
+            SetCheckedImgs(
                 prevImgs => [...prevImgs, imgId]
             )
-        // Supprimer du state checkedImg les checkbox plus cochées
+            // Supprimer du state checkedImg les checkbox plus cochées
         } else if (checkedImgs.length !== 0 && !checked) {
-            SetCheckedImgs (
+            SetCheckedImgs(
                 prevImgs => prevImgs.filter(img => img !== imgId)
             )
         }
     }
 
+    function renameImg(id) {
+        console.log("hello");
+
+        const newName = prompt("Entrez le nouveau nom:");
+        if (newName === null) return;
+
+        const request = indexedDB.open("markdown_repository");
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("images", "readwrite");
+            const store = tx.objectStore("images");
+            const getRequest = store.get(id);  // Utiliser l'id passé en paramètre
+
+            getRequest.onsuccess = () => {
+                const image = getRequest.result;
+                console.log(image);
+
+                const renameImage = {
+                    ...image,
+                    nom: newName,
+                };
+                console.log(renameImage);
+                const updateRequest = store.put(renameImage);
+
+                updateRequest.onsuccess = () => {
+                    // Mise à jour réussie, mettre à jour l'état imgs pour refléter la modification
+                    setImgs((prevImgs) =>
+                        prevImgs.map((img) => (img.id === renameImage.id ? renameImage : img))
+                    );
+                };
+
+                updateRequest.onerror = (event) => {
+                    console.error("Erreur lors de la mise à jour dans IndexedDB", event);
+                };
+            };
+        };
+
+        request.onerror = (event) => {
+            console.error("Erreur lors de l'ouverture de la base de données pour renommer un élément:", event);
+        };
+    }
+
+    function deleteImg(id) {
+        const isConfirmed = confirm("Êtes-vous sûr de vouloir supprimer cette image ?");
+        if (!isConfirmed) return;
+    
+        const request = indexedDB.open("markdown_repository");
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("images", "readwrite");
+            const store = tx.objectStore("images");
+    
+            const deleteRequest = store.delete(id);
+    
+            deleteRequest.onsuccess = () => {
+                // Mise à jour réussie, mettre à jour l'état imgs pour refléter la suppression
+                setImgs((prevImgs) => prevImgs.filter((img) => img.id !== id));
+            };
+    
+            deleteRequest.onerror = (event) => {
+                console.error("Erreur lors de la suppression dans IndexedDB", event);
+            };
+        };
+    
+        request.onerror = (event) => {
+            console.error("Erreur lors de l'ouverture de la base de données pour supprimer un élément:", event);
+        };
+    
+    }
+    
 
 
     return (
         <>
-            <MesImages 
-                imgs={imgs} 
-                futureImg={futureImg} 
-                handleFutureImg={handleFutureImg} 
-                handleImg={handleImg} 
+
+            <MesImages
+                imgs={imgs}
+                futureImg={futureImg}
+                handleFutureImg={handleFutureImg}
+                handleImg={handleImg}
                 handleCancel={handleCancel}
                 handleFutureImgMldc={handleFutureImgMldc}
                 handleExport={handleExport}
                 handleCheckedBox={handleCheckedBox}
+                renameImg={renameImg}
+                deleteImg={deleteImg}
             />
         </>
     )

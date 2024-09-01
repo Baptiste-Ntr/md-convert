@@ -1,6 +1,6 @@
 
 
-function CarreGallerie({srcImg, nomDeLaClasse, nom, selectionner, maxWidth, styleCustom}) {
+function CarreGallerie({srcImg, id, nom, selectionner, maxWidth, styleCustom}) {
   if (selectionner) {
     console.log("coucou");
   }
@@ -8,7 +8,7 @@ function CarreGallerie({srcImg, nomDeLaClasse, nom, selectionner, maxWidth, styl
 
   return (
     <div style={{styleCustom}}>
-        <img src={srcImg} style={{ maxWidth: maxWidth ? maxWidth : '100px' }}  id={nomDeLaClasse + '_' + crypto.randomUUID()}/>
+        <img src={srcImg} style={{ maxWidth: maxWidth ? maxWidth : '100px' }}  id={id}/>
         <p name="nomElement"> {nom} </p>
     </div>
   )
