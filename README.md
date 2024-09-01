@@ -11,7 +11,11 @@ Cloner le git, rentrez dans votre fichier, ouvrez votre invite de command, saisi
 
 Pour renommer les images ou les supprimer cela passe par le clic droit sur l'image
 
+
 Baptiste NAUTRE
+
 Pierre PERDIGUES
+
 Dorine JOURNET
+
 Antonin MASSON
