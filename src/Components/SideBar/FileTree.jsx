@@ -59,7 +59,7 @@ const FileTree = () => {
             }
             return newItems;
         });
-        localStorage.setItem('New File', "")
+        localStorage.setItem('New File', "#New file")
         setTreeKey(Date.now());  // Change la clé pour forcer le rerender du composant Tree
     }, []);
 
