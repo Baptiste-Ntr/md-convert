@@ -11,6 +11,7 @@ Cloner le git, rentrez dans votre fichier, ouvrez votre invite de command, saisi
 
 Pour renommer les images ou les supprimer cela passe par le clic droit sur l'image
 
+<br/><br/>
 
 Baptiste NAUTRE
 
